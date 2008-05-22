@@ -40,7 +40,6 @@ import org.nuxeo.runtime.api.Framework;
 public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         WSIndexingGateway {
 
-
     private static final long serialVersionUID = 4696352633818100451L;
 
     protected final WSAuditBeanBusinessDelegate auditBeanDelegate = new WSAuditBeanBusinessDelegate();
@@ -255,21 +254,36 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public ModifiedDocumentDescriptorPage listModifiedDocumentsByPage(
             @WebParam(name = "sessionId")
             String sessionId, @WebParam(name = "dateRangeQuery")
-            String dateRangeQuery,
-            @WebParam(name = "path") String path,
-            @WebParam(name = "page") int page, @WebParam(name = "pageSize")int pageSize) throws AuditException {
-        return getWSAudit().listModifiedDocumentsByPage(sessionId, dateRangeQuery, path, page, pageSize);
+            String dateRangeQuery, @WebParam(name = "path")
+            String path, @WebParam(name = "page")
+            int page, @WebParam(name = "pageSize")
+            int pageSize) throws AuditException {
+        return getWSAudit().listModifiedDocumentsByPage(sessionId,
+                dateRangeQuery, path, page, pageSize);
     }
 
     @WebMethod
-    public EventDescriptorPage listEventsByPage(
-            @WebParam(name = "sessionId")
-            String sessionId, @WebParam(name = "dateRangeQuery")
-            String dateRangeQuery,
-            @WebParam(name = "page") int page, @WebParam(name = "pageSize")int pageSize) throws AuditException {
-        return getWSAudit().listEventsByPage(sessionId, dateRangeQuery, page, pageSize);
+    public EventDescriptorPage listEventsByPage(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "dateRangeQuery")
+    String dateRangeQuery, @WebParam(name = "page")
+    int page, @WebParam(name = "pageSize")
+    int pageSize) throws AuditException {
+        return getWSAudit().listEventsByPage(sessionId, dateRangeQuery, page,
+                pageSize);
     }
 
+    @WebMethod
+    public EventDescriptorPage listDocumentEventsByPage(
+            @WebParam(name = "sessionId")
+            String sessionId, @WebParam(name = "dateRangeQuery")
+            String dateRangeQuery, @WebParam(name = "startDate")
+            String startDate, @WebParam(name = "path")
+            String path, @WebParam(name = "page")
+            int page, @WebParam(name = "pageSize")
+            int pageSize) throws AuditException {
+        return getWSAudit().listDocumentEventsByPage(sessionId, dateRangeQuery, startDate,
+                path, page, pageSize);
+    }
 
     @WebMethod
     public String getRelativePathAsString(@WebParam(name = "sessionId")
@@ -306,30 +320,34 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         getWSNuxeoRemoting().disconnect(sid);
     }
 
-
     @WebMethod
-    public EventDescriptorPage queryEventsByPage(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "whereClause") String whereClause, @WebParam(name = "pageIndex")int page, @WebParam(name = "pageSize")int pageSize) throws AuditException
-    {
-        return getWSAudit().queryEventsByPage(sessionId, whereClause, page, pageSize);
+    public EventDescriptorPage queryEventsByPage(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "whereClause")
+    String whereClause, @WebParam(name = "pageIndex")
+    int page, @WebParam(name = "pageSize")
+    int pageSize) throws AuditException {
+        return getWSAudit().queryEventsByPage(sessionId, whereClause, page,
+                pageSize);
     }
 
     @WebMethod
-    public boolean validateUserPassword(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "username") String username,@WebParam(name = "password") String password) throws ClientException
-    {
+    public boolean validateUserPassword(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "username")
+    String username, @WebParam(name = "password")
+    String password) throws ClientException {
         WSRemotingSession rs = initSession(sessionId);
         return rs.getUserManager().checkUsernamePassword(username, password);
     }
 
     @WebMethod
-    public String[] getUserGroups(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "username") String username) throws ClientException
-    {
+    public String[] getUserGroups(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "username")
+    String username) throws ClientException {
         WSRemotingSession rs = initSession(sessionId);
         List<String> groups = rs.getUserManager().getPrincipal(username).getAllGroups();
         String[] groupArray = new String[groups.size()];
         groups.toArray(groupArray);
         return groupArray;
     }
-
 
 }
