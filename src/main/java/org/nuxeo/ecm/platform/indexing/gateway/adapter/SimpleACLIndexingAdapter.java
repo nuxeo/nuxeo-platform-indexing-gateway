@@ -76,6 +76,6 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
                 filteredAceList.add(ace);
             }
         }
-        return filteredAceList.toArray(new ACE[index]);
+        return filteredAceList.toArray(new ACE[filteredAceList.size()]);
     }
 }
