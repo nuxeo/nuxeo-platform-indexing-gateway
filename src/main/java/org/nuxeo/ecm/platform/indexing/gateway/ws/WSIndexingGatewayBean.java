@@ -282,8 +282,8 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
             String path, @WebParam(name = "page")
             int page, @WebParam(name = "pageSize")
             int pageSize) throws AuditException {
-        return getWSAudit().listDocumentEventsByPage(sessionId, dateRangeQuery, startDate,
-                path, page, pageSize);
+        return getWSAudit().listDocumentEventsByPage(sessionId, dateRangeQuery,
+                startDate, path, page, pageSize);
     }
 
     @WebMethod
@@ -349,6 +349,13 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         String[] groupArray = new String[groups.size()];
         groups.toArray(groupArray);
         return groupArray;
+    }
+
+    @WebMethod
+    public DocumentSnapshot getDocumentSnapshot(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "uuid")
+    String uuid) throws ClientException {
+        return getWSNuxeoRemoting().getDocumentSnapshot(sessionId, uuid);
     }
 
 }
