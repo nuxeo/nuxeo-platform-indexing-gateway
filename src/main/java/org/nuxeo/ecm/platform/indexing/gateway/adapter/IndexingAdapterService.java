@@ -50,9 +50,13 @@ public class IndexingAdapterService extends DefaultComponent implements
 
     public static final String INTUITION_ADAPTER_XP = "adapters";
 
+    public static final String BLOB_FORMAT_XP = "blobFormat";
+
     protected final List<IndexingAdapterDescriptor> registeredAdapters = new LinkedList<IndexingAdapterDescriptor>();
 
     protected final List<IndexingAdapter> mergedAdapters = new LinkedList<IndexingAdapter>();
+
+    protected boolean useDownloadUrl=true;
 
     public void registerContribution(Object contribution,
             String extensionPoint, ComponentInstance contributor)
@@ -68,7 +72,11 @@ public class IndexingAdapterService extends DefaultComponent implements
                 descriptor.setAdapterInstance(adapterInstance);
             }
             registeredAdapters.add(descriptor);
-        } else {
+        } else if (BLOB_FORMAT_XP.equals(extensionPoint)) {
+            BlobFormatDescriptor desc = (BlobFormatDescriptor) contribution;
+            useDownloadUrl = desc.isUseDownloadUrl();
+        }
+        else {
             throw new Exception("unsupported extension point: "
                     + extensionPoint);
         }
@@ -163,5 +171,9 @@ public class IndexingAdapterService extends DefaultComponent implements
             }
         }
         return mergedAdapters;
+    }
+
+    public boolean useDownloadUrlForBlob() {
+        return useDownloadUrl;
     }
 }

@@ -46,4 +46,7 @@ public interface IndexingAdapter {
     DocumentProperty[] adaptDocumentProperties(CoreSession session,
             String uuid, DocumentProperty[] properties) throws ClientException;
 
+
+    boolean useDownloadUrlForBlob();
+
 }

@@ -34,6 +34,13 @@ import org.nuxeo.ecm.platform.ws.AbstractNuxeoWebService;
 import org.nuxeo.ecm.platform.ws.delegate.NuxeoRemotingBeanBusinessDelegate;
 import org.nuxeo.runtime.api.Framework;
 
+/**
+ *
+ * Base class for WS beans used for external indexers.
+ *
+ * @author tiry
+ *
+ */
 @Stateless
 @SerializedConcurrentAccess
 @WebService(name = "WSIndexingGatewayInterface", serviceName = "WSIndexingGatewayService")
@@ -135,13 +142,20 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         return getAdapter().adaptDocumentLocalACL(session, uuid, aces);
     }
 
+
+    public DocumentBlob[] getDocumentBlobsExt(@WebParam(name = "sessionId")
+    String sid, @WebParam(name = "uuid")
+    String uuid, @WebParam(name = "useDownloadUrl") boolean useDownloadUrl) throws ClientException {
+        CoreSession session = initSession(sid).getDocumentManager();
+        DocumentBlob[] blobs = getWSNuxeoRemoting().getDocumentBlobsExt(sid, uuid, useDownloadUrl);
+        return getAdapter().adaptDocumentBlobs(session, uuid, blobs);
+    }
+
     @WebMethod
     public DocumentBlob[] getDocumentBlobs(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        DocumentBlob[] blobs = getWSNuxeoRemoting().getDocumentBlobs(sid, uuid);
-        return getAdapter().adaptDocumentBlobs(session, uuid, blobs);
+        return getDocumentBlobsExt(sid, uuid, getAdapter().useDownloadUrlForBlob());
     }
 
     @WebMethod
@@ -351,11 +365,29 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         return groupArray;
     }
 
+
+    public DocumentSnapshot getDocumentSnapshotExt(@WebParam(name = "sessionId")
+    String sessionId, @WebParam(name = "uuid")
+    String uuid, @WebParam(name = "useDownloadUrl") boolean useDownloadUrl) throws ClientException {
+        return getWSNuxeoRemoting().getDocumentSnapshotExt(sessionId, uuid, useDownloadUrl);
+    }
+
     @WebMethod
     public DocumentSnapshot getDocumentSnapshot(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "uuid")
-    String uuid) throws ClientException {
-        return getWSNuxeoRemoting().getDocumentSnapshot(sessionId, uuid);
+    String uuid)  throws ClientException {
+        return getDocumentSnapshotExt(sessionId, uuid, getAdapter().useDownloadUrlForBlob());
+    }
+
+    public ModifiedDocumentDescriptorPage listDeletedDocumentsByPage(
+            @WebParam(name = "sessionId")
+            String sessionId, @WebParam(name = "dataRangeQuery")
+            String dateRangeQuery, @WebParam(name = "docPath")
+            String path, @WebParam(name = "pageIndex")
+            int page, @WebParam(name = "pageSize")
+            int pageSize) throws AuditException {
+
+        return getWSAudit().listDeletedDocumentsByPage(sessionId, dateRangeQuery, path, page, pageSize);
     }
 
 }

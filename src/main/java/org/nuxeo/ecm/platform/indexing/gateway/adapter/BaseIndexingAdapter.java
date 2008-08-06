@@ -25,6 +25,8 @@ import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 /**
  * Base class to derive to help implement contributions to the
  * IndexingAdapterService.
@@ -65,6 +67,10 @@ public class BaseIndexingAdapter implements IndexingAdapter {
     public DocumentProperty[] adaptDocumentProperties(CoreSession session,
             String uuid, DocumentProperty[] properties) throws ClientException {
         return properties;
+    }
+
+    public boolean useDownloadUrlForBlob() {
+        throw new NotImplementedException();
     }
 
 }
