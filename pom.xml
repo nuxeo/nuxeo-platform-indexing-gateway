@@ -14,7 +14,6 @@
     Provide a generic webservice interface (SOAP/JAX-RCP) for external indexing engine.
     Can be used as base class for dedicated connectors.
   </description>
-  <version>5.1.6-SNAPSHOT</version>
 
 
   <dependencies>
