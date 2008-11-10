@@ -56,7 +56,7 @@ public class IndexingAdapterService extends DefaultComponent implements
 
     protected final List<IndexingAdapter> mergedAdapters = new LinkedList<IndexingAdapter>();
 
-    protected boolean useDownloadUrl=true;
+    protected boolean useDownloadUrl = true;
 
     public void registerContribution(Object contribution,
             String extensionPoint, ComponentInstance contributor)
@@ -75,8 +75,7 @@ public class IndexingAdapterService extends DefaultComponent implements
         } else if (BLOB_FORMAT_XP.equals(extensionPoint)) {
             BlobFormatDescriptor desc = (BlobFormatDescriptor) contribution;
             useDownloadUrl = desc.isUseDownloadUrl();
-        }
-        else {
+        } else {
             throw new Exception("unsupported extension point: "
                     + extensionPoint);
         }
