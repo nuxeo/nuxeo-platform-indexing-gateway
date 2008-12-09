@@ -72,6 +72,9 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
                     + uuid);
             return properties;
         }
+        // remove the current document from the list of ancestors
+        parentDocuments = parentDocuments.subList(0, parentDocuments.size() - 1);
+
         // build a list with all the existing properties for document with ref
         // uuid
         List<DocumentProperty> enhancedProperties = new ArrayList<DocumentProperty>();
