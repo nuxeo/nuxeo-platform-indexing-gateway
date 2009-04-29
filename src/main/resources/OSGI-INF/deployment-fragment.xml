@@ -10,5 +10,10 @@
 
   </extension>
 
+  <extension target="jaxws#ENDPOINT">
+    <endpoint name="indexinggateway"
+      implementation="org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean"
+      url-pattern="/webservices/indexinggateway" />
+  </extension>
 </fragment>
 
