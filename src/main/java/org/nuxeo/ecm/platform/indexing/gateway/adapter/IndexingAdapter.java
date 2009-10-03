@@ -25,16 +25,17 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
+import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 public interface IndexingAdapter {
 
     DocumentDescriptor adaptDocumentDescriptor(CoreSession session,
             String uuid, DocumentDescriptor dd) throws ClientException;
 
-    ACE[] adaptDocumentACL(CoreSession session, String uuid, ACE[] aces)
+    WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
             throws ClientException;
 
-    ACE[] adaptDocumentLocalACL(CoreSession session, String uuid, ACE[] aces)
+    WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,  WsACE[] aces)
             throws ClientException;
 
     DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid,

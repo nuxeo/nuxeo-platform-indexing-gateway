@@ -32,6 +32,7 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
+import org.nuxeo.ecm.platform.api.ws.WsACE;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
 
@@ -103,7 +104,7 @@ public class IndexingAdapterService extends DefaultComponent implements
         return dd;
     }
 
-    public ACE[] adaptDocumentACL(CoreSession session, String uuid, ACE[] aces)
+    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
             throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentACL(session, uuid, aces);
@@ -111,8 +112,8 @@ public class IndexingAdapterService extends DefaultComponent implements
         return aces;
     }
 
-    public ACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-            ACE[] aces) throws ClientException {
+    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
+             WsACE[] aces) throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentLocalACL(session, uuid, aces);
         }

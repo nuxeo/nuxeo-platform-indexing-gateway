@@ -28,6 +28,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.core.search.api.backend.security.SecurityFiltering;
+import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 /**
  * Simple IndexingAdapter that filters blocked local ACEs with the default
@@ -56,26 +57,26 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
     }
 
     @Override
-    public ACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-            ACE[] aces) throws ClientException {
+    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
+             WsACE[] aces) throws ClientException {
         return adaptDocumentACL(session, uuid, aces);
     }
 
     @Override
-    public ACE[] adaptDocumentACL(CoreSession session, String uuid, ACE[] aces)
+    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
             throws ClientException {
-        List<ACE> aceList = Arrays.asList(aces);
-        List<ACE> filteredAceList = new LinkedList<ACE>();
+        List< WsACE> aceList = Arrays.asList(aces);
+        List< WsACE> filteredAceList = new LinkedList< WsACE>();
 
         int index = aceList.indexOf(BLOCKING_ACE);
         if (index != -1) {
             aceList = aceList.subList(0, index);
         }
-        for (ACE ace : aceList) {
+        for ( WsACE ace : aceList) {
             if (getPermissionsToIndex().contains(ace.getPermission())) {
                 filteredAceList.add(ace);
             }
         }
-        return filteredAceList.toArray(new ACE[filteredAceList.size()]);
+        return filteredAceList.toArray(new WsACE[filteredAceList.size()]);
     }
 }

@@ -20,10 +20,10 @@ package org.nuxeo.ecm.platform.indexing.gateway.adapter;
 
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
+import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -43,12 +43,12 @@ public class BaseIndexingAdapter implements IndexingAdapter {
         return dd;
     }
 
-    public ACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-            ACE[] aces) throws ClientException {
+    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
+             WsACE[] aces) throws ClientException {
         return aces;
     }
 
-    public ACE[] adaptDocumentACL(CoreSession session, String uuid, ACE[] aces)
+    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
             throws ClientException {
         return aces;
     }

@@ -24,6 +24,7 @@ import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 import org.nuxeo.ecm.platform.api.ws.DocumentSnapshot;
 import org.nuxeo.ecm.platform.api.ws.NuxeoRemoting;
+import org.nuxeo.ecm.platform.api.ws.WsACE;
 import org.nuxeo.ecm.platform.api.ws.session.WSRemotingSession;
 import org.nuxeo.ecm.platform.audit.api.AuditException;
 import org.nuxeo.ecm.platform.audit.ws.EventDescriptorPage;
@@ -146,29 +147,29 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     }
 
     @WebMethod
-    public ACE[] getDocumentACL(@WebParam(name = "sessionId")
+    public  WsACE[] getDocumentACL(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid) throws ClientException {
         CoreSession session = initSession(sid).getDocumentManager();
-        ACE[] aces;
+        WsACE[] aces;
         if (session.exists(new IdRef(uuid))) {
             aces = getWSNuxeoRemoting().getDocumentACL(sid, uuid);
         } else {
-            aces = new ACE[0];
+            aces = new  WsACE[0];
         }
         return getAdapter().adaptDocumentACL(session, uuid, aces);
     }
 
     @WebMethod
-    public ACE[] getDocumentLocalACL(@WebParam(name = "sessionId")
+    public  WsACE[] getDocumentLocalACL(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid) throws ClientException {
         CoreSession session = initSession(sid).getDocumentManager();
-        ACE[] aces;
+        WsACE[] aces;
         if (session.exists(new IdRef(uuid))) {
             aces = getWSNuxeoRemoting().getDocumentLocalACL(sid, uuid);
         } else {
-            aces = new ACE[0];
+            aces = new  WsACE[0];
         }
         return getAdapter().adaptDocumentLocalACL(session, uuid, aces);
     }
@@ -450,12 +451,12 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         DocumentProperty[] props = getDocumentNoBlobProperties(sessionId, uuid);
         DocumentBlob[] blobs = getDocumentBlobs(sessionId, uuid);
 
-        ACE[] resACP = null;
+        WsACE[] resACP = null;
 
         ACP acp = doc.getACP();
         if (acp != null) {
             ACL acl = acp.getMergedACLs("MergedACL");
-            resACP = acl.toArray(new ACE[acl.size()]);
+            resACP = acl.toArray(new  WsACE[acl.size()]);
         }
         DocumentSnapshot ds = new DocumentSnapshot(props, blobs,
                 doc.getPathAsString(), resACP);
