@@ -16,7 +16,6 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.PathRef;
-import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
@@ -454,9 +453,9 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         WsACE[] resACP = null;
 
         ACP acp = doc.getACP();
-        if (acp != null) {
+        if (acp != null && acp.getACLs().length>0) {
             ACL acl = acp.getMergedACLs("MergedACL");
-            resACP = acl.toArray(new  WsACE[acl.size()]);
+            resACP = WsACE.wrap(acl.getACEs());
         }
         DocumentSnapshot ds = new DocumentSnapshot(props, blobs,
                 doc.getPathAsString(), resACP);
