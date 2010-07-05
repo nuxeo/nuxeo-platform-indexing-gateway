@@ -1,6 +1,9 @@
 package org.nuxeo.ecm.platform.indexing.gateway.ws;
 
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.ejb.Stateless;
 import javax.jws.WebMethod;
@@ -14,10 +17,16 @@ import org.jboss.annotation.ejb.SerializedConcurrentAccess;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.IdRef;
+import org.nuxeo.ecm.core.api.IterableQueryResult;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
+import org.nuxeo.ecm.core.api.security.SecurityConstants;
+import org.nuxeo.ecm.core.query.sql.NXQL;
+import org.nuxeo.ecm.core.schema.DocumentType;
+import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
@@ -260,6 +269,86 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         }
         return null;
     }
+
+    @WebMethod
+    public UUIDPage getRecursiveChildrenUUIDsByPage(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid , @WebParam(name = "page") int page, @WebParam(name = "pageSize") int pageSize) throws ClientException {
+
+        CoreSession session = initSession(sid).getDocumentManager();
+
+        List<String> uuids = new ArrayList<String>();
+        IdRef parentRef = new IdRef(uuid);
+        DocumentModel parent = session.getDocument(parentRef);
+        String path = parent.getPathAsString();
+
+        String query = "select ecm:uuid from Document where ecm:path startswith '" + path + "' order by ecm:uuid";
+
+        IterableQueryResult result = session.queryAndFetch(query, "NXQL");
+        boolean hasMore = false;
+        try {
+            if (page>1) {
+                int skip=(page-1)*pageSize;
+                result.skipTo(skip);
+            }
+
+            for (Map<String, Serializable> record:result) {
+                uuids.add((String)record.get(NXQL.ECM_UUID));
+                if (uuids.size()==pageSize) {
+                    hasMore=true;
+                    break;
+                }
+            }
+        }
+        finally {
+            result.close();
+        }
+        return new UUIDPage(uuids.toArray(new String[uuids.size()]),page,hasMore) ;
+    }
+
+    @WebMethod
+    public String[] getRecursiveChildrenUUIDs(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid ) throws ClientException {
+
+        CoreSession session = initSession(sid).getDocumentManager();
+
+        List<String> uuids = new ArrayList<String>();
+        IdRef parentRef = new IdRef(uuid);
+        DocumentModel parent = session.getDocument(parentRef);
+        String path = parent.getPathAsString();
+
+        String query = "select ecm:uuid from Document where ecm:path startswith '" + path + "' order by ecm:uuid";
+
+        IterableQueryResult result = session.queryAndFetch(query, "NXQL");
+
+        try {
+            for (Map<String, Serializable> record:result) {
+                uuids.add((String)record.get(NXQL.ECM_UUID));
+            }
+        }
+        finally {
+            result.close();
+        }
+
+        return uuids.toArray(new String[uuids.size()]);
+    }
+
+    @WebMethod
+    public DocumentTypeDescriptor[] getTypeDefinitions() throws ClientException {
+
+        List<DocumentTypeDescriptor> result = new ArrayList<DocumentTypeDescriptor>();
+        SchemaManager sm = null;
+        try {
+            sm = Framework.getService(SchemaManager.class);
+        }
+        catch (Exception e) {
+            throw new ClientException("Unable to access SchemaManager", e);
+        }
+
+        for (DocumentType dt : sm.getDocumentTypes()) {
+            result.add(new DocumentTypeDescriptor(dt));
+        }
+
+        return result.toArray(new DocumentTypeDescriptor[result.size()]);
+    }
+
 
     @WebMethod
     public DocumentDescriptor getDocumentFromPath(@WebParam(name = "sessionId")
