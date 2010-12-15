@@ -5,7 +5,7 @@
   <extension target="application#MODULE">
 
     <module>
-      <ejb>${bundle.fileName}</ejb>
+      <java>${bundle.fileName}</java>
     </module>
 
   </extension>
@@ -15,5 +15,19 @@
       implementation="org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean"
       url-pattern="/webservices/indexinggateway" />
   </extension>
+  
+  <extension target="web#JBOSSWS">
+    <servlet>
+      <description>Nuxeo Indexing Gateway Web Services End Point</description>
+      <display-name>Nuxeo Indexing Gateway Web Services End Point</display-name>
+      <servlet-name>NuxeoIndexingGatewayEndPoint</servlet-name>
+      <servlet-class>org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean</servlet-class>
+    </servlet>
+    <servlet-mapping>
+      <servlet-name>NuxeoIndexingGatewayEndPoint</servlet-name>
+      <url-pattern>/webservices/indexinggateway</url-pattern>
+    </servlet-mapping>
+  </extension>
+  
 </fragment>
 

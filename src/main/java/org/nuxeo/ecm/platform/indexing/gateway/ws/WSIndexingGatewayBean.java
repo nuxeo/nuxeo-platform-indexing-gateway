@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.Stateless;
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -13,17 +12,14 @@ import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.naming.NamingException;
 
-import org.jboss.annotation.ejb.SerializedConcurrentAccess;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
-import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.IterableQueryResult;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
-import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.core.query.sql.NXQL;
 import org.nuxeo.ecm.core.schema.DocumentType;
 import org.nuxeo.ecm.core.schema.SchemaManager;
@@ -38,12 +34,12 @@ import org.nuxeo.ecm.platform.audit.api.AuditException;
 import org.nuxeo.ecm.platform.audit.ws.EventDescriptorPage;
 import org.nuxeo.ecm.platform.audit.ws.ModifiedDocumentDescriptor;
 import org.nuxeo.ecm.platform.audit.ws.ModifiedDocumentDescriptorPage;
+import org.nuxeo.ecm.platform.audit.ws.WSAuditBean;
 import org.nuxeo.ecm.platform.audit.ws.api.WSAudit;
-import org.nuxeo.ecm.platform.audit.ws.delegate.WSAuditBeanBusinessDelegate;
 import org.nuxeo.ecm.platform.indexing.gateway.adapter.IndexingAdapter;
 import org.nuxeo.ecm.platform.indexing.gateway.ws.api.WSIndexingGateway;
 import org.nuxeo.ecm.platform.ws.AbstractNuxeoWebService;
-import org.nuxeo.ecm.platform.ws.delegate.NuxeoRemotingBeanBusinessDelegate;
+import org.nuxeo.ecm.platform.ws.NuxeoRemotingBean;
 import org.nuxeo.runtime.api.Framework;
 
 /**
@@ -57,8 +53,6 @@ import org.nuxeo.runtime.api.Framework;
  * @author tiry
  *
  */
-@Stateless
-@SerializedConcurrentAccess
 @WebService(name = "WSIndexingGatewayInterface", serviceName = "WSIndexingGatewayService")
 @SOAPBinding(style = Style.DOCUMENT)
 public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
@@ -66,11 +60,8 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
 
     private static final long serialVersionUID = 4696352633818100451L;
 
-    protected final WSAuditBeanBusinessDelegate auditBeanDelegate = new WSAuditBeanBusinessDelegate();
-
     protected transient WSAudit auditBean;
 
-    protected final NuxeoRemotingBeanBusinessDelegate platformBeanDelegate = new NuxeoRemotingBeanBusinessDelegate();
 
     protected transient NuxeoRemoting platformRemoting;
 
@@ -78,29 +69,14 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
 
     protected WSAudit getWSAudit() throws AuditException {
         if (auditBean == null) {
-            try {
-                auditBean = auditBeanDelegate.getWSAuditRemote();
-            } catch (NamingException ne) {
-                throw new AuditException("Cannot find audit bean...");
-            }
-        }
-        if (auditBean == null) {
-            throw new AuditException("Cannot find audit bean...");
+             auditBean = new WSAuditBean();
         }
         return auditBean;
     }
 
     protected NuxeoRemoting getWSNuxeoRemoting() throws ClientException {
         if (platformRemoting == null) {
-            try {
-                platformRemoting = platformBeanDelegate.getWSNuxeoRemotingRemote();
-            } catch (NamingException ne) {
-                throw new ClientException("Cannot find nuxeo remoting bean...");
-            }
-        }
-
-        if (platformRemoting == null) {
-            throw new ClientException("Cannot find nuxeo remoting bean...");
+            platformRemoting = new NuxeoRemotingBean();
         }
         return platformRemoting;
     }
