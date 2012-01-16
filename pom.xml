@@ -1,12 +1,11 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <parent>
-    <groupId>org.nuxeo.ecm.platform</groupId>
-    <artifactId>nuxeo-features-parent</artifactId>
-    <version>5.4.2-SNAPSHOT</version>
+    <groupId>org.nuxeo</groupId>
+    <artifactId>nuxeo-addons-parent</artifactId>
+    <version>5.6-SNAPSHOT</version>
   </parent>
 
   <artifactId>nuxeo-platform-indexing-gateway</artifactId>
@@ -15,7 +14,6 @@
     Provide a generic webservice interface (SOAP/JAX-RCP) for external indexing engine.
     Can be used as base class for dedicated connectors.
   </description>
-
 
   <dependencies>
     <dependency>
@@ -62,10 +60,15 @@
         <enabled>false</enabled>
       </releases>
       <snapshots>
-        <updatePolicy>always</updatePolicy>
         <enabled>true</enabled>
       </snapshots>
     </repository>
   </repositories>
+
+  <scm>
+    <connection>scm:git:git://github.com/nuxeo/nuxeo-platform-indexing-gateway.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com:nuxeo/nuxeo-platform-indexing-gateway.git</developerConnection>
+    <url>https://github.com/nuxeo/nuxeo-platform-indexing-gateway</url>
+  </scm>
 
 </project>
