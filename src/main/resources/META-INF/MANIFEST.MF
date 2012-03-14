@@ -8,4 +8,6 @@ Require-Bundle: org.nuxeo.ecm.platform,
 Provide-Package: org.nuxeo.ecm.platform.indexing.gateway.adapter,
  org.nuxeo.ecm.platform.indexing.gateway.ws,
  org.nuxeo.ecm.platform.indexing.gateway.ws.api
-Nuxeo-Component: OSGI-INF/indexing-adapter-framework.xml
+Nuxeo-Component: OSGI-INF/indexing-adapter-framework.xml,
+ OSGI-INF/request-controler-contrib.xml
+

@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -11,6 +14,8 @@ import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.jws.soap.SOAPBinding.Style;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
@@ -42,33 +47,81 @@ import org.nuxeo.ecm.platform.ws.NuxeoRemotingBean;
 import org.nuxeo.runtime.api.Framework;
 
 /**
- *
+ * 
  * Base class for WS beans used for external indexers. Implements most of
  * NuxeoRemotingBean trying as hard as possible no to throw ClientException when
  * a requested document is missing but returning empty descriptions instead so
  * as to make external indexers not view recently deleted documents as
  * applicative errors.
- *
+ * 
  * @author tiry
- *
+ * 
  */
 @WebService(name = "WSIndexingGatewayInterface", serviceName = "WSIndexingGatewayService")
 @SOAPBinding(style = Style.DOCUMENT)
 public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         WSIndexingGateway {
 
+    protected static final String ENFORCE_SYNC_PROP_NAME = "nuxeo.indexing.gateway.forceSync";
+
+    protected static Log log = LogFactory.getLog(WSIndexingGatewayBean.class);
+
     private static final long serialVersionUID = 4696352633818100451L;
 
     protected transient WSAudit auditBean;
-
 
     protected transient NuxeoRemoting platformRemoting;
 
     protected IndexingAdapter adapter;
 
+    protected ConcurrentHashMap<String, ReentrantLock> sessionIdLocks = new ConcurrentHashMap<String, ReentrantLock>();
+
+    protected Boolean enforceSync = null;
+
+    protected boolean forceSync() {
+        if (enforceSync == null) {
+            String value = Framework.getProperty(ENFORCE_SYNC_PROP_NAME, null);
+            enforceSync = false;
+            if (value != null) {
+                enforceSync = Boolean.parseBoolean(value);
+            } else {
+                enforceSync = false;
+            }
+        }
+        return enforceSync;
+    }
+
+    protected void lockSession(String sid) {
+        if (forceSync()) {
+            ReentrantLock lock = sessionIdLocks.putIfAbsent(sid,
+                    new ReentrantLock());
+            boolean aquired = false;
+            if (lock == null) {
+                lock = sessionIdLocks.get(sid);
+            }
+            try {
+                aquired = lock.tryLock(10, TimeUnit.SECONDS);
+            } catch (Throwable e) {
+                log.error("Failed to acquire lock for sid " + sid, e);
+            }
+            if (!aquired) {
+                log.error("Failed to acquire lock (timeout) for sid " + sid);
+            }
+        }
+    }
+
+    protected void releaseSession(String sid) {
+        if (forceSync()) {
+            ReentrantLock lock = sessionIdLocks.get(sid);
+            if (lock != null) {
+                lock.unlock();
+            }
+        }
+    }
+
     protected WSAudit getWSAudit() throws AuditException {
         if (auditBean == null) {
-             auditBean = new WSAuditBean();
+            auditBean = new WSAuditBean();
         }
         return auditBean;
     }
@@ -95,11 +148,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public DocumentDescriptor[] getChildren(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sessionId).getDocumentManager();
-        if (session.exists(new IdRef(uuid))) {
-            return getWSNuxeoRemoting().getChildren(sessionId, uuid);
-        } else {
-            return new DocumentDescriptor[0];
+        try {
+            lockSession(sessionId);
+            CoreSession session = initSession(sessionId).getDocumentManager();
+            if (session.exists(new IdRef(uuid))) {
+                return getWSNuxeoRemoting().getChildren(sessionId, uuid);
+            } else {
+                return new DocumentDescriptor[0];
+            }
+        } finally {
+            releaseSession(sessionId);
         }
     }
 
@@ -107,11 +165,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public DocumentDescriptor getCurrentVersion(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        if (session.exists(new IdRef(uid))) {
-            return getWSNuxeoRemoting().getCurrentVersion(sid, uid);
-        } else {
-            return missingDocumentDescriptor(uid);
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            if (session.exists(new IdRef(uid))) {
+                return getWSNuxeoRemoting().getCurrentVersion(sid, uid);
+            } else {
+                return missingDocumentDescriptor(uid);
+            }
+        } finally {
+            releaseSession(sid);
         }
     }
 
@@ -119,57 +182,78 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public DocumentDescriptor getDocument(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sessionId).getDocumentManager();
-        DocumentDescriptor dd;
-        if (session.exists(new IdRef(uuid))) {
-            dd = getWSNuxeoRemoting().getDocument(sessionId, uuid);
-        } else {
-            dd = missingDocumentDescriptor(uuid);
+        try {
+            lockSession(sessionId);
+            CoreSession session = initSession(sessionId).getDocumentManager();
+            DocumentDescriptor dd;
+            if (session.exists(new IdRef(uuid))) {
+                dd = getWSNuxeoRemoting().getDocument(sessionId, uuid);
+            } else {
+                dd = missingDocumentDescriptor(uuid);
+            }
+            return getAdapter().adaptDocumentDescriptor(session, uuid, dd);
+        } finally {
+            releaseSession(sessionId);
         }
-        return getAdapter().adaptDocumentDescriptor(session, uuid, dd);
     }
 
     @WebMethod
-    public  WsACE[] getDocumentACL(@WebParam(name = "sessionId")
+    public WsACE[] getDocumentACL(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        WsACE[] aces;
-        if (session.exists(new IdRef(uuid))) {
-            aces = getWSNuxeoRemoting().getDocumentACL(sid, uuid);
-        } else {
-            aces = new  WsACE[0];
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            WsACE[] aces;
+            if (session.exists(new IdRef(uuid))) {
+                aces = getWSNuxeoRemoting().getDocumentACL(sid, uuid);
+            } else {
+                aces = new WsACE[0];
+            }
+            return getAdapter().adaptDocumentACL(session, uuid, aces);
+        } finally {
+            releaseSession(sid);
         }
-        return getAdapter().adaptDocumentACL(session, uuid, aces);
     }
 
     @WebMethod
-    public  WsACE[] getDocumentLocalACL(@WebParam(name = "sessionId")
+    public WsACE[] getDocumentLocalACL(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        WsACE[] aces;
-        if (session.exists(new IdRef(uuid))) {
-            aces = getWSNuxeoRemoting().getDocumentLocalACL(sid, uuid);
-        } else {
-            aces = new  WsACE[0];
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            WsACE[] aces;
+            if (session.exists(new IdRef(uuid))) {
+                aces = getWSNuxeoRemoting().getDocumentLocalACL(sid, uuid);
+            } else {
+                aces = new WsACE[0];
+            }
+            return getAdapter().adaptDocumentLocalACL(session, uuid, aces);
+        } finally {
+            releaseSession(sid);
         }
-        return getAdapter().adaptDocumentLocalACL(session, uuid, aces);
     }
 
     public DocumentBlob[] getDocumentBlobsExt(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uuid, @WebParam(name = "useDownloadUrl")
     boolean useDownloadUrl) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        DocumentBlob[] blobs;
-        if (session.exists(new IdRef(uuid))) {
-            blobs = getWSNuxeoRemoting().getDocumentBlobsExt(sid, uuid,
-                    useDownloadUrl);
-        } else {
-            blobs = new DocumentBlob[0];
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            DocumentBlob[] blobs;
+            if (session.exists(new IdRef(uuid))) {
+                blobs = getWSNuxeoRemoting().getDocumentBlobsExt(sid, uuid,
+                        useDownloadUrl);
+            } else {
+                blobs = new DocumentBlob[0];
+            }
+            return getAdapter().adaptDocumentBlobs(session, uuid, blobs);
+
+        } finally {
+            releaseSession(sid);
         }
-        return getAdapter().adaptDocumentBlobs(session, uuid, blobs);
     }
 
     @WebMethod
@@ -185,16 +269,23 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
             @WebParam(name = "sessionId")
             String sid, @WebParam(name = "uuid")
             String uuid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        DocumentProperty[] properties;
-        if (session.exists(new IdRef(uuid))) {
-            properties = getWSNuxeoRemoting().getDocumentNoBlobProperties(sid,
-                    uuid);
-        } else {
-            properties = new DocumentProperty[0];
+
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            DocumentProperty[] properties;
+            if (session.exists(new IdRef(uuid))) {
+                properties = getWSNuxeoRemoting().getDocumentNoBlobProperties(
+                        sid, uuid);
+            } else {
+                properties = new DocumentProperty[0];
+            }
+            return getAdapter().adaptDocumentNoBlobProperties(session, uuid,
+                    properties);
+        } finally {
+            releaseSession(sid);
         }
-        return getAdapter().adaptDocumentNoBlobProperties(session, uuid,
-                properties);
+
     }
 
     @WebMethod
@@ -202,14 +293,21 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
             @WebParam(name = "sessionId")
             String sid, @WebParam(name = "uuid")
             String uuid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        DocumentProperty[] properties;
-        if (session.exists(new IdRef(uuid))) {
-            properties = getWSNuxeoRemoting().getDocumentProperties(sid, uuid);
-        } else {
-            properties = new DocumentProperty[0];
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            DocumentProperty[] properties;
+            if (session.exists(new IdRef(uuid))) {
+                properties = getWSNuxeoRemoting().getDocumentProperties(sid,
+                        uuid);
+            } else {
+                properties = new DocumentProperty[0];
+            }
+            return getAdapter().adaptDocumentProperties(session, uuid,
+                    properties);
+        } finally {
+            releaseSession(sid);
         }
-        return getAdapter().adaptDocumentProperties(session, uuid, properties);
     }
 
     @WebMethod
@@ -228,81 +326,111 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     @WebMethod
     public DocumentDescriptor getRootDocument(@WebParam(name = "sessionId")
     String sessionId) throws ClientException {
-        return getWSNuxeoRemoting().getRootDocument(sessionId);
+        try {
+            lockSession(sessionId);
+            return getWSNuxeoRemoting().getRootDocument(sessionId);
+        } finally {
+            releaseSession(sessionId);
+        }
     }
 
     @WebMethod
     public String resolvePathToUUID(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "path")
     String path) throws ClientException {
-        CoreSession session = initSession(sessionId).getDocumentManager();
-        if (session != null) {
-            PathRef pathRef = new PathRef(path);
-            if (session.exists(pathRef)) {
-                return session.getDocument(pathRef).getId();
-            }
-        }
-        return null;
-    }
-
-    @WebMethod
-    public UUIDPage getRecursiveChildrenUUIDsByPage(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid , @WebParam(name = "page") int page, @WebParam(name = "pageSize") int pageSize) throws ClientException {
-
-        CoreSession session = initSession(sid).getDocumentManager();
-
-        List<String> uuids = new ArrayList<String>();
-        IdRef parentRef = new IdRef(uuid);
-        DocumentModel parent = session.getDocument(parentRef);
-        String path = parent.getPathAsString();
-
-        String query = "select ecm:uuid from Document where ecm:path startswith '" + path + "' order by ecm:uuid";
-
-        IterableQueryResult result = session.queryAndFetch(query, "NXQL");
-        boolean hasMore = false;
         try {
-            if (page>1) {
-                int skip=(page-1)*pageSize;
-                result.skipTo(skip);
-            }
-
-            for (Map<String, Serializable> record:result) {
-                uuids.add((String)record.get(NXQL.ECM_UUID));
-                if (uuids.size()==pageSize) {
-                    hasMore=true;
-                    break;
+            lockSession(sessionId);
+            CoreSession session = initSession(sessionId).getDocumentManager();
+            if (session != null) {
+                PathRef pathRef = new PathRef(path);
+                if (session.exists(pathRef)) {
+                    return session.getDocument(pathRef).getId();
                 }
             }
+            return null;
+        } finally {
+            releaseSession(sessionId);
         }
-        finally {
-            result.close();
-        }
-        return new UUIDPage(uuids.toArray(new String[uuids.size()]),page,hasMore) ;
     }
 
     @WebMethod
-    public String[] getRecursiveChildrenUUIDs(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid ) throws ClientException {
-
-        CoreSession session = initSession(sid).getDocumentManager();
-
-        List<String> uuids = new ArrayList<String>();
-        IdRef parentRef = new IdRef(uuid);
-        DocumentModel parent = session.getDocument(parentRef);
-        String path = parent.getPathAsString();
-
-        String query = "select ecm:uuid from Document where ecm:path startswith '" + path + "' order by ecm:uuid";
-
-        IterableQueryResult result = session.queryAndFetch(query, "NXQL");
+    public UUIDPage getRecursiveChildrenUUIDsByPage(
+            @WebParam(name = "sessionId")
+            String sid, @WebParam(name = "uuid")
+            String uuid, @WebParam(name = "page")
+            int page, @WebParam(name = "pageSize")
+            int pageSize) throws ClientException {
 
         try {
-            for (Map<String, Serializable> record:result) {
-                uuids.add((String)record.get(NXQL.ECM_UUID));
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+
+            List<String> uuids = new ArrayList<String>();
+            IdRef parentRef = new IdRef(uuid);
+            DocumentModel parent = session.getDocument(parentRef);
+            String path = parent.getPathAsString();
+
+            String query = "select ecm:uuid from Document where ecm:path startswith '"
+                    + path + "' order by ecm:uuid";
+
+            IterableQueryResult result = session.queryAndFetch(query, "NXQL");
+            boolean hasMore = false;
+            try {
+                if (page > 1) {
+                    int skip = (page - 1) * pageSize;
+                    result.skipTo(skip);
+                }
+
+                for (Map<String, Serializable> record : result) {
+                    uuids.add((String) record.get(NXQL.ECM_UUID));
+                    if (uuids.size() == pageSize) {
+                        hasMore = true;
+                        break;
+                    }
+                }
+            } finally {
+                result.close();
             }
-        }
-        finally {
-            result.close();
+            return new UUIDPage(uuids.toArray(new String[uuids.size()]), page,
+                    hasMore);
+        } finally {
+            releaseSession(sid);
         }
 
-        return uuids.toArray(new String[uuids.size()]);
+    }
+
+    @WebMethod
+    public String[] getRecursiveChildrenUUIDs(@WebParam(name = "sessionId")
+    String sid, @WebParam(name = "uuid")
+    String uuid) throws ClientException {
+
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+
+            List<String> uuids = new ArrayList<String>();
+            IdRef parentRef = new IdRef(uuid);
+            DocumentModel parent = session.getDocument(parentRef);
+            String path = parent.getPathAsString();
+
+            String query = "select ecm:uuid from Document where ecm:path startswith '"
+                    + path + "' order by ecm:uuid";
+
+            IterableQueryResult result = session.queryAndFetch(query, "NXQL");
+
+            try {
+                for (Map<String, Serializable> record : result) {
+                    uuids.add((String) record.get(NXQL.ECM_UUID));
+                }
+            } finally {
+                result.close();
+            }
+
+            return uuids.toArray(new String[uuids.size()]);
+        } finally {
+            releaseSession(sid);
+        }
+
     }
 
     @WebMethod
@@ -312,8 +440,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         SchemaManager sm = null;
         try {
             sm = Framework.getService(SchemaManager.class);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new ClientException("Unable to access SchemaManager", e);
         }
 
@@ -324,17 +451,22 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
         return result.toArray(new DocumentTypeDescriptor[result.size()]);
     }
 
-
     @WebMethod
     public DocumentDescriptor getDocumentFromPath(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "path")
     String path) throws ClientException {
-        String uuid = resolvePathToUUID(sessionId, path);
-        if (uuid != null) {
-            return getWSNuxeoRemoting().getDocument(sessionId, uuid);
-        } else {
-            // should we return a missing document with an null uuid instead?
-            return null;
+        try {
+            lockSession(sessionId);
+            String uuid = resolvePathToUUID(sessionId, path);
+            if (uuid != null) {
+                return getWSNuxeoRemoting().getDocument(sessionId, uuid);
+            } else {
+                // should we return a missing document with an null uuid
+                // instead?
+                return null;
+            }
+        } finally {
+            releaseSession(sessionId);
         }
     }
 
@@ -342,11 +474,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public DocumentDescriptor getSourceDocument(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        if (session.exists(new IdRef(uid))) {
-            return getWSNuxeoRemoting().getSourceDocument(sid, uid);
-        } else {
-            return missingDocumentDescriptor(uid);
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            if (session.exists(new IdRef(uid))) {
+                return getWSNuxeoRemoting().getSourceDocument(sid, uid);
+            } else {
+                return missingDocumentDescriptor(uid);
+            }
+        } finally {
+            releaseSession(sid);
         }
     }
 
@@ -361,11 +498,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public DocumentDescriptor[] getVersions(@WebParam(name = "sessionId")
     String sid, @WebParam(name = "uuid")
     String uid) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        if (session.exists(new IdRef(uid))) {
-            return getWSNuxeoRemoting().getVersions(sid, uid);
-        } else {
-            return new DocumentDescriptor[0];
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            if (session.exists(new IdRef(uid))) {
+                return getWSNuxeoRemoting().getVersions(sid, uid);
+            } else {
+                return new DocumentDescriptor[0];
+            }
+        } finally {
+            releaseSession(sid);
         }
     }
 
@@ -432,11 +574,17 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public String getRelativePathAsString(@WebParam(name = "sessionId")
     String sessionId, @WebParam(name = "uuid")
     String uuid) throws ClientException {
-        CoreSession session = initSession(sessionId).getDocumentManager();
-        if (session.exists(new IdRef(uuid))) {
-            return getWSNuxeoRemoting().getRelativePathAsString(sessionId, uuid);
-        } else {
-            return null;
+        try {
+            lockSession(sessionId);
+            CoreSession session = initSession(sessionId).getDocumentManager();
+            if (session.exists(new IdRef(uuid))) {
+                return getWSNuxeoRemoting().getRelativePathAsString(sessionId,
+                        uuid);
+            } else {
+                return null;
+            }
+        } finally {
+            releaseSession(sessionId);
         }
     }
 
@@ -445,11 +593,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     String sid, @WebParam(name = "uuid")
     String uuid, @WebParam(name = "permission")
     String permission) throws ClientException {
-        CoreSession session = initSession(sid).getDocumentManager();
-        if (session.exists(new IdRef(uuid))) {
-            return getWSNuxeoRemoting().hasPermission(sid, uuid, permission);
-        } else {
-            return false;
+        try {
+            lockSession(sid);
+            CoreSession session = initSession(sid).getDocumentManager();
+            if (session.exists(new IdRef(uuid))) {
+                return getWSNuxeoRemoting().hasPermission(sid, uuid, permission);
+            } else {
+                return false;
+            }
+        } finally {
+            releaseSession(sid);
         }
     }
 
@@ -457,7 +610,13 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public String uploadDocument(@WebParam(name = "sessionId")
     String sid, String path, String type, String[] properties)
             throws ClientException {
-        return getWSNuxeoRemoting().uploadDocument(sid, path, type, properties);
+        try {
+            lockSession(sid);
+            return getWSNuxeoRemoting().uploadDocument(sid, path, type,
+                    properties);
+        } finally {
+            releaseSession(sid);
+        }
     }
 
     @WebMethod
@@ -471,6 +630,15 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     public void disconnect(@WebParam(name = "sessionId")
     String sid) throws ClientException {
         getWSNuxeoRemoting().disconnect(sid);
+        if (forceSync()) {
+            ReentrantLock lock = sessionIdLocks.get(sid);
+            if (lock != null) {
+                if (lock.isLocked()) {
+                    lock.unlock();
+                }
+                sessionIdLocks.remove(sid);
+            }
+        }
     }
 
     @WebMethod
@@ -508,22 +676,30 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
             String sessionId, @WebParam(name = "uuid")
             String uuid, @WebParam(name = "useDownloadUrl")
             boolean useDownloadUrl) throws ClientException {
-        WSRemotingSession rs = initSession(sessionId);
-        DocumentModel doc = rs.getDocumentManager().getDocument(new IdRef(uuid));
 
-        DocumentProperty[] props = getDocumentNoBlobProperties(sessionId, uuid);
-        DocumentBlob[] blobs = getDocumentBlobs(sessionId, uuid);
+        try {
+            lockSession(sessionId);
+            WSRemotingSession rs = initSession(sessionId);
+            DocumentModel doc = rs.getDocumentManager().getDocument(
+                    new IdRef(uuid));
 
-        WsACE[] resACP = null;
+            DocumentProperty[] props = getDocumentNoBlobProperties(sessionId,
+                    uuid);
+            DocumentBlob[] blobs = getDocumentBlobs(sessionId, uuid);
 
-        ACP acp = doc.getACP();
-        if (acp != null && acp.getACLs().length>0) {
-            ACL acl = acp.getMergedACLs("MergedACL");
-            resACP = WsACE.wrap(acl.getACEs());
+            WsACE[] resACP = null;
+
+            ACP acp = doc.getACP();
+            if (acp != null && acp.getACLs().length > 0) {
+                ACL acl = acp.getMergedACLs("MergedACL");
+                resACP = WsACE.wrap(acl.getACEs());
+            }
+            DocumentSnapshot ds = new DocumentSnapshot(props, blobs,
+                    doc.getPathAsString(), resACP);
+            return ds;
+        } finally {
+            releaseSession(sessionId);
         }
-        DocumentSnapshot ds = new DocumentSnapshot(props, blobs,
-                doc.getPathAsString(), resACP);
-        return ds;
     }
 
     @WebMethod
@@ -549,7 +725,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements
     /**
      * Utility method to build descriptor for a document that is non longer to
      * be found in the repository.
-     *
+     * 
      * @param uuid
      * @return
      */
