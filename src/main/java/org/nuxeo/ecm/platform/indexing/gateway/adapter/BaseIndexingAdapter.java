@@ -25,16 +25,14 @@ import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 import org.nuxeo.ecm.platform.api.ws.WsACE;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 /**
  * Base class to derive to help implement contributions to the
  * IndexingAdapterService.
- *
+ * 
  * All methods of this class return the raw parameter without modifying it.
- *
+ * 
  * @author Olivier Grisel <ogrisel@nuxeo.com>
- *
+ * 
  */
 public class BaseIndexingAdapter implements IndexingAdapter {
 
@@ -43,13 +41,13 @@ public class BaseIndexingAdapter implements IndexingAdapter {
         return dd;
     }
 
-    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-             WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
+            WsACE[] aces) throws ClientException {
         return aces;
     }
 
-    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
-            throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid,
+            WsACE[] aces) throws ClientException {
         return aces;
     }
 
@@ -70,7 +68,7 @@ public class BaseIndexingAdapter implements IndexingAdapter {
     }
 
     public boolean useDownloadUrlForBlob() {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException();
     }
 
 }
