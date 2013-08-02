@@ -35,10 +35,6 @@
       <groupId>javax.ejb</groupId>
       <artifactId>ejb</artifactId>
     </dependency>
-    <dependency>
-      <groupId>javax.jws</groupId>
-      <artifactId>jsr181</artifactId>
-    </dependency>
   </dependencies>
 
   <repositories>
