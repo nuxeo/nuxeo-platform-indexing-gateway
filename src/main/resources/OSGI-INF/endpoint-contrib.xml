@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="org.nuxeo.ecm.platform.indexing.gateway.endpoint">
+
+  <extension target="org.nuxeo.ecm.platform.ws.WSEndpointManager" point="endpoint">
+    <endpoint name="indexinggateway" address="/indexinggateway"
+      implementor="org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean" />
+  </extension>
+</component>
