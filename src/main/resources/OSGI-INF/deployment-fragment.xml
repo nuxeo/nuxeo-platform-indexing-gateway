@@ -1,33 +1,9 @@
 <?xml version="1.0"?>
-
 <fragment version="1">
-
   <extension target="application#MODULE">
-
     <module>
       <java>${bundle.fileName}</java>
     </module>
-
   </extension>
-
-  <extension target="jaxws#ENDPOINT">
-    <endpoint name="indexinggateway"
-      implementation="org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean"
-      url-pattern="/webservices/indexinggateway" />
-  </extension>
-  
-  <extension target="web#JBOSSWS">
-    <servlet>
-      <description>Nuxeo Indexing Gateway Web Services End Point</description>
-      <display-name>Nuxeo Indexing Gateway Web Services End Point</display-name>
-      <servlet-name>NuxeoIndexingGatewayEndPoint</servlet-name>
-      <servlet-class>org.nuxeo.ecm.platform.indexing.gateway.ws.WSIndexingGatewayBean</servlet-class>
-    </servlet>
-    <servlet-mapping>
-      <servlet-name>NuxeoIndexingGatewayEndPoint</servlet-name>
-      <url-pattern>/webservices/indexinggateway</url-pattern>
-    </servlet-mapping>
-  </extension>
-  
 </fragment>
 
