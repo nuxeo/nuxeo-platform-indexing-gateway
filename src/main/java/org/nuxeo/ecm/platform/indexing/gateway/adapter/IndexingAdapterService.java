@@ -28,11 +28,11 @@ import java.util.Map;
 
 import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
-import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 import org.nuxeo.ecm.platform.api.ws.WsACE;
+import org.nuxeo.runtime.RuntimeServiceException;
 import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
 
@@ -60,16 +60,20 @@ public class IndexingAdapterService extends DefaultComponent implements
     protected boolean useDownloadUrl = true;
 
     public void registerContribution(Object contribution,
-            String extensionPoint, ComponentInstance contributor)
-            throws Exception {
+            String extensionPoint, ComponentInstance contributor) {
         if (INTUITION_ADAPTER_XP.equals(extensionPoint)) {
             mergedAdapters.clear(); // invalidate merged contributions
             IndexingAdapterDescriptor descriptor = (IndexingAdapterDescriptor) contribution;
             if (descriptor.isEnabled()) {
                 // do not try to instantiate classes to be disabled by the
                 // contribution
-                IndexingAdapter adapterInstance = (IndexingAdapter) contributor.getContext().loadClass(
-                        descriptor.getClassName()).newInstance();
+                IndexingAdapter adapterInstance;
+                try {
+                    adapterInstance = (IndexingAdapter) contributor.getContext().loadClass(
+                            descriptor.getClassName()).newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new RuntimeException(e);
+                }
                 descriptor.setAdapterInstance(adapterInstance);
             }
             registeredAdapters.add(descriptor);
@@ -77,21 +81,20 @@ public class IndexingAdapterService extends DefaultComponent implements
             BlobFormatDescriptor desc = (BlobFormatDescriptor) contribution;
             useDownloadUrl = desc.isUseDownloadUrl();
         } else {
-            throw new Exception("unsupported extension point: "
+            throw new RuntimeServiceException("unsupported extension point: "
                     + extensionPoint);
         }
     }
 
     public void unregisterContribution(Object contribution,
-            String extensionPoint, ComponentInstance contributor)
-            throws Exception {
+            String extensionPoint, ComponentInstance contributor) {
         if (INTUITION_ADAPTER_XP.equals(extensionPoint)) {
             mergedAdapters.clear(); // invalidate merged contributions
             IndexingAdapterDescriptor descriptor = (IndexingAdapterDescriptor) contribution;
             registeredAdapters.remove(registeredAdapters.lastIndexOf(descriptor));
 
         } else {
-            throw new Exception("unsupported extension point: "
+            throw new RuntimeServiceException("unsupported extension point: "
                     + extensionPoint);
         }
     }
