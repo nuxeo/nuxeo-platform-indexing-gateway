@@ -5,11 +5,9 @@ import java.io.Serializable;
 import org.nuxeo.ecm.core.schema.DocumentType;
 
 /**
- *
  * JAXB object for {@link DocumentType} export via WS
  *
  * @author tiry
- *
  */
 public class DocumentTypeDescriptor implements Serializable {
 
@@ -18,10 +16,14 @@ public class DocumentTypeDescriptor implements Serializable {
      */
     private static final long serialVersionUID = 1L;
 
-    protected boolean isFile=false;
-    protected boolean isFolder=false;
+    protected boolean isFile = false;
+
+    protected boolean isFolder = false;
+
     protected String name;
+
     protected String[] facets;
+
     protected String[] schemas;
 
     public DocumentTypeDescriptor() {

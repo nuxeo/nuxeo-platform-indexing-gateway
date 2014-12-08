@@ -32,9 +32,8 @@ import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 
 /**
- * Adapter to build a new property ecm:pathTitle holding the physical path in
- * the repository with human readable titles instead of technical local path ids
- * found in the default ecm:path property.
+ * Adapter to build a new property ecm:pathTitle holding the physical path in the repository with human readable titles
+ * instead of technical local path ids found in the default ecm:path property.
  *
  * @author Olivier Grisel <ogrisel@nuxeo.com>
  */
@@ -48,28 +47,26 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
     public static final String PATH_SEPARATOR = "/";
 
     @Override
-    public DocumentProperty[] adaptDocumentNoBlobProperties(
-            CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+    public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
+            DocumentProperty[] properties) throws ClientException {
         return addPathTitleProperty(session, uuid, properties);
     }
 
     @Override
-    public DocumentProperty[] adaptDocumentProperties(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException {
+    public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
+            throws ClientException {
         return addPathTitleProperty(session, uuid, properties);
     }
 
-    protected DocumentProperty[] addPathTitleProperty(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException {
+    protected DocumentProperty[] addPathTitleProperty(CoreSession session, String uuid, DocumentProperty[] properties)
+            throws ClientException {
 
         IdRef docRef = new IdRef(uuid);
         List<DocumentModel> parentDocuments;
         try {
             parentDocuments = session.getParentDocuments(docRef);
         } catch (ClientException e) {
-            log.warn("could not get path title property for missing document with ref "
-                    + uuid);
+            log.warn("could not get path title property for missing document with ref " + uuid);
             return properties;
         }
         // remove the current document from the list of ancestors
@@ -86,8 +83,7 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
             titles.add(ancestor.getTitle());
         }
         String pathTitle = StringUtils.join(titles, PATH_SEPARATOR);
-        enhancedProperties.add(new DocumentProperty(PATH_TITLE_PROPERTY,
-                pathTitle));
+        enhancedProperties.add(new DocumentProperty(PATH_TITLE_PROPERTY, pathTitle));
 
         return enhancedProperties.toArray(new DocumentProperty[enhancedProperties.size()]);
     }

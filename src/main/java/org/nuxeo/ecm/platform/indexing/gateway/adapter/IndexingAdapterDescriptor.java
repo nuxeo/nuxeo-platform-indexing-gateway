@@ -23,8 +23,7 @@ import org.nuxeo.common.xmap.annotation.XNode;
 import org.nuxeo.common.xmap.annotation.XObject;
 
 @XObject("adapter")
-public class IndexingAdapterDescriptor implements
-        Comparable<IndexingAdapterDescriptor> {
+public class IndexingAdapterDescriptor implements Comparable<IndexingAdapterDescriptor> {
 
     @XNode("@class")
     private String className = "";

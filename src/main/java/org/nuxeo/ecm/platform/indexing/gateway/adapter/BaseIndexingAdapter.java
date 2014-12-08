@@ -26,44 +26,38 @@ import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
 import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 /**
- * Base class to derive to help implement contributions to the
- * IndexingAdapterService.
- * 
- * All methods of this class return the raw parameter without modifying it.
+ * Base class to derive to help implement contributions to the IndexingAdapterService. All methods of this class return
+ * the raw parameter without modifying it.
  * 
  * @author Olivier Grisel <ogrisel@nuxeo.com>
- * 
  */
 public class BaseIndexingAdapter implements IndexingAdapter {
 
-    public DocumentDescriptor adaptDocumentDescriptor(CoreSession session,
-            String uuid, DocumentDescriptor dd) throws ClientException {
+    public DocumentDescriptor adaptDocumentDescriptor(CoreSession session, String uuid, DocumentDescriptor dd)
+            throws ClientException {
         return dd;
     }
 
-    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-            WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
         return aces;
     }
 
-    public WsACE[] adaptDocumentACL(CoreSession session, String uuid,
-            WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
         return aces;
     }
 
-    public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid,
-            DocumentBlob[] blobs) throws ClientException {
+    public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid, DocumentBlob[] blobs)
+            throws ClientException {
         return blobs;
     }
 
-    public DocumentProperty[] adaptDocumentNoBlobProperties(
-            CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+    public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
+            DocumentProperty[] properties) throws ClientException {
         return properties;
     }
 
-    public DocumentProperty[] adaptDocumentProperties(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException {
+    public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
+            throws ClientException {
         return properties;
     }
 

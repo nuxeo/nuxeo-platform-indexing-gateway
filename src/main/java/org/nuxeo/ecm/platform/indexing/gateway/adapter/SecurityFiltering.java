@@ -18,18 +18,14 @@ public class SecurityFiltering {
     public static final String[] BROWSE_PERMISSION_SEEDS = { SecurityConstants.BROWSE };
 
     /**
-     * Return the recursive closure of all permissions that comprises the
-     * requested seed permissions.
-     *
-     * TODO: this logics should be moved upward to the PermissionProvider
-     * interface.
+     * Return the recursive closure of all permissions that comprises the requested seed permissions. TODO: this logics
+     * should be moved upward to the PermissionProvider interface.
      *
      * @param seedPermissions
      * @return the list of permissions, seeds inclusive
      * @throws Exception
      */
-    public static List<String> getPermissionList(String[] seedPermissions)
-            throws Exception {
+    public static List<String> getPermissionList(String[] seedPermissions) throws Exception {
         PermissionProvider pprovider = Framework.getService(PermissionProvider.class);
         List<String> aggregatedPerms = new LinkedList<String>();
         for (String seedPerm : seedPermissions) {
@@ -48,11 +44,9 @@ public class SecurityFiltering {
     }
 
     /**
-     * This is the list of all permissions that grant access to some indexed
-     * document.
+     * This is the list of all permissions that grant access to some indexed document.
      *
-     * @return the list of all permissions that include Browse directly or
-     *         un-directly
+     * @return the list of all permissions that include Browse directly or un-directly
      * @throws Exception
      */
     public static List<String> getBrowsePermissionList() throws Exception {

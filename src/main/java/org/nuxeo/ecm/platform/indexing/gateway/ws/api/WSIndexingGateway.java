@@ -17,9 +17,9 @@ public interface WSIndexingGateway extends NuxeoRemoting, WSAudit {
 
     String[] getUserGroups(String sessionId, String username) throws ClientException;
 
-    String[] getRecursiveChildrenUUIDs(String sid, String uuid ) throws ClientException;
+    String[] getRecursiveChildrenUUIDs(String sid, String uuid) throws ClientException;
 
-    UUIDPage getRecursiveChildrenUUIDsByPage(String sid,String uuid ,int page, int pageSize) throws ClientException;
+    UUIDPage getRecursiveChildrenUUIDsByPage(String sid, String uuid, int page, int pageSize) throws ClientException;
 
     DocumentTypeDescriptor[] getTypeDefinitions() throws ClientException;
 

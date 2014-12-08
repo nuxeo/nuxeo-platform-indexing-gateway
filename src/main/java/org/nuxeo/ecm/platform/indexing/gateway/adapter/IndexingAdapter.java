@@ -29,23 +29,20 @@ import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 public interface IndexingAdapter {
 
-    DocumentDescriptor adaptDocumentDescriptor(CoreSession session,
-            String uuid, DocumentDescriptor dd) throws ClientException;
-
-    WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
+    DocumentDescriptor adaptDocumentDescriptor(CoreSession session, String uuid, DocumentDescriptor dd)
             throws ClientException;
 
-    WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,  WsACE[] aces)
+    WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException;
+
+    WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException;
+
+    DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid, DocumentBlob[] blobs) throws ClientException;
+
+    DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid, DocumentProperty[] properties)
             throws ClientException;
 
-    DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid,
-            DocumentBlob[] blobs) throws ClientException;
-
-    DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException;
-
-    DocumentProperty[] adaptDocumentProperties(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException;
+    DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
+            throws ClientException;
 
     boolean useDownloadUrlForBlob();
 

@@ -37,17 +37,13 @@ import org.nuxeo.runtime.model.ComponentInstance;
 import org.nuxeo.runtime.model.DefaultComponent;
 
 /**
- * Service to allow client code to register converters for the datastructures
- * served to the Sinequa Intuition to be indexed.
- *
- * This is especially useful to be able to index Access Control Policy after
- * some post-processing since the ACL model of Intuition is not as expressive as
- * the Nuxeo Core security model.
+ * Service to allow client code to register converters for the datastructures served to the Sinequa Intuition to be
+ * indexed. This is especially useful to be able to index Access Control Policy after some post-processing since the ACL
+ * model of Intuition is not as expressive as the Nuxeo Core security model.
  *
  * @author Olivier Grisel <ogrisel@nuxeo.com>
  */
-public class IndexingAdapterService extends DefaultComponent implements
-        IndexingAdapter {
+public class IndexingAdapterService extends DefaultComponent implements IndexingAdapter {
 
     public static final String INTUITION_ADAPTER_XP = "adapters";
 
@@ -59,8 +55,7 @@ public class IndexingAdapterService extends DefaultComponent implements
 
     protected boolean useDownloadUrl = true;
 
-    public void registerContribution(Object contribution,
-            String extensionPoint, ComponentInstance contributor) {
+    public void registerContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
         if (INTUITION_ADAPTER_XP.equals(extensionPoint)) {
             mergedAdapters.clear(); // invalidate merged contributions
             IndexingAdapterDescriptor descriptor = (IndexingAdapterDescriptor) contribution;
@@ -69,8 +64,7 @@ public class IndexingAdapterService extends DefaultComponent implements
                 // contribution
                 IndexingAdapter adapterInstance;
                 try {
-                    adapterInstance = (IndexingAdapter) contributor.getContext().loadClass(
-                            descriptor.getClassName()).newInstance();
+                    adapterInstance = (IndexingAdapter) contributor.getContext().loadClass(descriptor.getClassName()).newInstance();
                 } catch (ReflectiveOperationException e) {
                     throw new RuntimeException(e);
                 }
@@ -81,71 +75,63 @@ public class IndexingAdapterService extends DefaultComponent implements
             BlobFormatDescriptor desc = (BlobFormatDescriptor) contribution;
             useDownloadUrl = desc.isUseDownloadUrl();
         } else {
-            throw new RuntimeServiceException("unsupported extension point: "
-                    + extensionPoint);
+            throw new RuntimeServiceException("unsupported extension point: " + extensionPoint);
         }
     }
 
-    public void unregisterContribution(Object contribution,
-            String extensionPoint, ComponentInstance contributor) {
+    public void unregisterContribution(Object contribution, String extensionPoint, ComponentInstance contributor) {
         if (INTUITION_ADAPTER_XP.equals(extensionPoint)) {
             mergedAdapters.clear(); // invalidate merged contributions
             IndexingAdapterDescriptor descriptor = (IndexingAdapterDescriptor) contribution;
             registeredAdapters.remove(registeredAdapters.lastIndexOf(descriptor));
 
         } else {
-            throw new RuntimeServiceException("unsupported extension point: "
-                    + extensionPoint);
+            throw new RuntimeServiceException("unsupported extension point: " + extensionPoint);
         }
     }
 
-    public DocumentDescriptor adaptDocumentDescriptor(CoreSession session,
-            String uuid, DocumentDescriptor dd) throws ClientException {
+    public DocumentDescriptor adaptDocumentDescriptor(CoreSession session, String uuid, DocumentDescriptor dd)
+            throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             dd = adapter.adaptDocumentDescriptor(session, uuid, dd);
         }
         return dd;
     }
 
-    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
-            throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentACL(session, uuid, aces);
         }
         return aces;
     }
 
-    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-             WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentLocalACL(session, uuid, aces);
         }
         return aces;
     }
 
-    public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid,
-            DocumentBlob[] blobs) throws ClientException {
+    public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid, DocumentBlob[] blobs)
+            throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             blobs = adapter.adaptDocumentBlobs(session, uuid, blobs);
         }
         return blobs;
     }
 
-    public DocumentProperty[] adaptDocumentNoBlobProperties(
-            CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+    public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
+            DocumentProperty[] properties) throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
-            properties = adapter.adaptDocumentNoBlobProperties(session, uuid,
-                    properties);
+            properties = adapter.adaptDocumentNoBlobProperties(session, uuid, properties);
         }
         return properties;
     }
 
-    public DocumentProperty[] adaptDocumentProperties(CoreSession session,
-            String uuid, DocumentProperty[] properties) throws ClientException {
+    public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
+            throws ClientException {
         for (IndexingAdapter adapter : getMergedAdapters()) {
-            properties = adapter.adaptDocumentProperties(session, uuid,
-                    properties);
+            properties = adapter.adaptDocumentProperties(session, uuid, properties);
         }
         return properties;
     }

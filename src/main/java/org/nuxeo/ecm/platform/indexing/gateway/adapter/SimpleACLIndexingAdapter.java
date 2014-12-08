@@ -30,17 +30,14 @@ import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.platform.api.ws.WsACE;
 
 /**
- * Simple IndexingAdapter that filters blocked local ACEs with the default
- * blocking strategy in Nuxeo: "Deny Everything to Everyone" and only provide
- * intuition with permissions that are related to read access.
+ * Simple IndexingAdapter that filters blocked local ACEs with the default blocking strategy in Nuxeo:
+ * "Deny Everything to Everyone" and only provide intuition with permissions that are related to read access.
  *
  * @author Olivier Grisel <ogrisel@nuxeo.com>
- *
  */
 public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
 
-    protected final static ACE BLOCKING_ACE = new ACE(
-            SecurityConstants.EVERYONE, SecurityConstants.EVERYTHING, false);
+    protected final static ACE BLOCKING_ACE = new ACE(SecurityConstants.EVERYONE, SecurityConstants.EVERYTHING, false);
 
     protected List<String> CACHED_PERMISSIONS_TO_INDEX;
 
@@ -56,22 +53,20 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
     }
 
     @Override
-    public  WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid,
-             WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
         return adaptDocumentACL(session, uuid, aces);
     }
 
     @Override
-    public  WsACE[] adaptDocumentACL(CoreSession session, String uuid,  WsACE[] aces)
-            throws ClientException {
-        List< WsACE> aceList = Arrays.asList(aces);
-        List< WsACE> filteredAceList = new LinkedList< WsACE>();
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+        List<WsACE> aceList = Arrays.asList(aces);
+        List<WsACE> filteredAceList = new LinkedList<WsACE>();
 
         int index = aceList.indexOf(BLOCKING_ACE);
         if (index != -1) {
             aceList = aceList.subList(0, index);
         }
-        for ( WsACE ace : aceList) {
+        for (WsACE ace : aceList) {
             if (getPermissionsToIndex().contains(ace.getPermission())) {
                 filteredAceList.add(ace);
             }

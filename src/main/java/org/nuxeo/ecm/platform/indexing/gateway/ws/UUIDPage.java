@@ -12,10 +12,10 @@ public class UUIDPage implements Serializable {
 
     private boolean hasMorePage;
 
-    public UUIDPage(String[] uuids, int pageIndex,boolean hasMorePage) {
-        this.uuids=uuids;
-        this.pageIndex=pageIndex;
-        this.hasMorePage=hasMorePage;
+    public UUIDPage(String[] uuids, int pageIndex, boolean hasMorePage) {
+        this.uuids = uuids;
+        this.pageIndex = pageIndex;
+        this.hasMorePage = hasMorePage;
     }
 
     public UUIDPage() {
