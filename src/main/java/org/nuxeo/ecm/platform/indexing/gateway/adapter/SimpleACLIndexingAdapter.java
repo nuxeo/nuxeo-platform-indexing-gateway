@@ -41,7 +41,7 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
 
     protected List<String> CACHED_PERMISSIONS_TO_INDEX;
 
-    protected List<String> getPermissionsToIndex() throws ClientException {
+    protected List<String> getPermissionsToIndex() {
         if (CACHED_PERMISSIONS_TO_INDEX == null) {
             try {
                 CACHED_PERMISSIONS_TO_INDEX = SecurityFiltering.getBrowsePermissionList();
@@ -53,12 +53,12 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
     }
 
     @Override
-    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) {
         return adaptDocumentACL(session, uuid, aces);
     }
 
     @Override
-    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) {
         List<WsACE> aceList = Arrays.asList(aces);
         List<WsACE> filteredAceList = new LinkedList<WsACE>();
 

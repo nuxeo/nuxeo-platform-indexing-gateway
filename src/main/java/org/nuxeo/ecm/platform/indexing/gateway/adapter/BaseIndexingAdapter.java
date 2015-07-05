@@ -34,30 +34,30 @@ import org.nuxeo.ecm.platform.api.ws.WsACE;
 public class BaseIndexingAdapter implements IndexingAdapter {
 
     public DocumentDescriptor adaptDocumentDescriptor(CoreSession session, String uuid, DocumentDescriptor dd)
-            throws ClientException {
+            {
         return dd;
     }
 
-    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) {
         return aces;
     }
 
-    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) {
         return aces;
     }
 
     public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid, DocumentBlob[] blobs)
-            throws ClientException {
+            {
         return blobs;
     }
 
     public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
-            DocumentProperty[] properties) throws ClientException {
+            DocumentProperty[] properties) {
         return properties;
     }
 
     public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+            {
         return properties;
     }
 

@@ -9,18 +9,18 @@ import org.nuxeo.ecm.platform.indexing.gateway.ws.UUIDPage;
 
 public interface WSIndexingGateway extends NuxeoRemoting, WSAudit {
 
-    String resolvePathToUUID(String sessionId, String path) throws ClientException;
+    String resolvePathToUUID(String sessionId, String path);
 
-    DocumentDescriptor getDocumentFromPath(String sessionId, String path) throws ClientException;
+    DocumentDescriptor getDocumentFromPath(String sessionId, String path);
 
-    boolean validateUserPassword(String sessionId, String username, String password) throws ClientException;
+    boolean validateUserPassword(String sessionId, String username, String password);
 
-    String[] getUserGroups(String sessionId, String username) throws ClientException;
+    String[] getUserGroups(String sessionId, String username);
 
-    String[] getRecursiveChildrenUUIDs(String sid, String uuid) throws ClientException;
+    String[] getRecursiveChildrenUUIDs(String sid, String uuid);
 
-    UUIDPage getRecursiveChildrenUUIDsByPage(String sid, String uuid, int page, int pageSize) throws ClientException;
+    UUIDPage getRecursiveChildrenUUIDsByPage(String sid, String uuid, int page, int pageSize);
 
-    DocumentTypeDescriptor[] getTypeDefinitions() throws ClientException;
+    DocumentTypeDescriptor[] getTypeDefinitions();
 
 }
