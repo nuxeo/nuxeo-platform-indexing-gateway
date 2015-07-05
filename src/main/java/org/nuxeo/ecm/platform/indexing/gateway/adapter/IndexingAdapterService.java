@@ -91,21 +91,21 @@ public class IndexingAdapterService extends DefaultComponent implements Indexing
     }
 
     public DocumentDescriptor adaptDocumentDescriptor(CoreSession session, String uuid, DocumentDescriptor dd)
-            throws ClientException {
+            {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             dd = adapter.adaptDocumentDescriptor(session, uuid, dd);
         }
         return dd;
     }
 
-    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentACL(CoreSession session, String uuid, WsACE[] aces) {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentACL(session, uuid, aces);
         }
         return aces;
     }
 
-    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) throws ClientException {
+    public WsACE[] adaptDocumentLocalACL(CoreSession session, String uuid, WsACE[] aces) {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             aces = adapter.adaptDocumentLocalACL(session, uuid, aces);
         }
@@ -113,7 +113,7 @@ public class IndexingAdapterService extends DefaultComponent implements Indexing
     }
 
     public DocumentBlob[] adaptDocumentBlobs(CoreSession session, String uuid, DocumentBlob[] blobs)
-            throws ClientException {
+            {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             blobs = adapter.adaptDocumentBlobs(session, uuid, blobs);
         }
@@ -121,7 +121,7 @@ public class IndexingAdapterService extends DefaultComponent implements Indexing
     }
 
     public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
-            DocumentProperty[] properties) throws ClientException {
+            DocumentProperty[] properties) {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             properties = adapter.adaptDocumentNoBlobProperties(session, uuid, properties);
         }
@@ -129,14 +129,14 @@ public class IndexingAdapterService extends DefaultComponent implements Indexing
     }
 
     public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+            {
         for (IndexingAdapter adapter : getMergedAdapters()) {
             properties = adapter.adaptDocumentProperties(session, uuid, properties);
         }
         return properties;
     }
 
-    protected List<IndexingAdapter> getMergedAdapters() throws ClientException {
+    protected List<IndexingAdapter> getMergedAdapters() {
         if (mergedAdapters.isEmpty()) {
             synchronized (this) {
                 Map<String, IndexingAdapterDescriptor> descriptorByClass = new HashMap<String, IndexingAdapterDescriptor>();

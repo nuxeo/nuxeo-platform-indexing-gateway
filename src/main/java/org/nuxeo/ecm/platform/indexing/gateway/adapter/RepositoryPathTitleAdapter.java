@@ -48,18 +48,18 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
 
     @Override
     public DocumentProperty[] adaptDocumentNoBlobProperties(CoreSession session, String uuid,
-            DocumentProperty[] properties) throws ClientException {
+            DocumentProperty[] properties) {
         return addPathTitleProperty(session, uuid, properties);
     }
 
     @Override
     public DocumentProperty[] adaptDocumentProperties(CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+            {
         return addPathTitleProperty(session, uuid, properties);
     }
 
     protected DocumentProperty[] addPathTitleProperty(CoreSession session, String uuid, DocumentProperty[] properties)
-            throws ClientException {
+            {
 
         IdRef docRef = new IdRef(uuid);
         List<DocumentModel> parentDocuments;
