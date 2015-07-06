@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
@@ -43,11 +42,7 @@ public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
 
     protected List<String> getPermissionsToIndex() {
         if (CACHED_PERMISSIONS_TO_INDEX == null) {
-            try {
-                CACHED_PERMISSIONS_TO_INDEX = SecurityFiltering.getBrowsePermissionList();
-            } catch (Exception e) {
-                throw new ClientException(e);
-            }
+            CACHED_PERMISSIONS_TO_INDEX = SecurityFiltering.getBrowsePermissionList();
         }
         return CACHED_PERMISSIONS_TO_INDEX;
     }

@@ -1,6 +1,5 @@
 package org.nuxeo.ecm.platform.indexing.gateway.ws.api;
 
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;
 import org.nuxeo.ecm.platform.api.ws.NuxeoRemoting;
 import org.nuxeo.ecm.platform.audit.ws.api.WSAudit;

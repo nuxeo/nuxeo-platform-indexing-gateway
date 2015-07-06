@@ -25,7 +25,6 @@ import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.utils.StringUtils;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
@@ -62,13 +61,7 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
             {
 
         IdRef docRef = new IdRef(uuid);
-        List<DocumentModel> parentDocuments;
-        try {
-            parentDocuments = session.getParentDocuments(docRef);
-        } catch (ClientException e) {
-            log.warn("could not get path title property for missing document with ref " + uuid);
-            return properties;
-        }
+        List<DocumentModel> parentDocuments = session.getParentDocuments(docRef);
         // remove the current document from the list of ancestors
         parentDocuments = parentDocuments.subList(0, parentDocuments.size() - 1);
 

@@ -18,7 +18,6 @@
  */
 package org.nuxeo.ecm.platform.indexing.gateway.adapter;
 
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.platform.api.ws.DocumentBlob;
 import org.nuxeo.ecm.platform.api.ws.DocumentDescriptor;

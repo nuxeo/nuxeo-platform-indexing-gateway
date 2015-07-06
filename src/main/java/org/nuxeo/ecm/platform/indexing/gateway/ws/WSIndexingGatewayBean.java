@@ -16,7 +16,6 @@ import javax.jws.soap.SOAPBinding.Style;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.ecm.core.api.ClientException;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
@@ -48,9 +47,9 @@ import org.nuxeo.runtime.api.Framework;
 
 /**
  * Base class for WS beans used for external indexers. Implements most of NuxeoRemotingBean trying as hard as possible
- * no to throw ClientException when a requested document is missing but returning empty descriptions instead so as to
+ * no to throw when a requested document is missing but returning empty descriptions instead so as to
  * make external indexers not view recently deleted documents as applicative errors.
- * 
+ *
  * @author tiry
  */
 @WebService(name = "WSIndexingGatewayInterface", serviceName = "WSIndexingGatewayService")
@@ -130,9 +129,6 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     protected IndexingAdapter getAdapter() {
         if (adapter == null) {
             adapter = Framework.getLocalService(IndexingAdapter.class);
-            if (adapter == null) {
-                throw new ClientException("could not find IntuitionAdapterService");
-            }
         }
         return adapter;
     }
@@ -402,12 +398,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public DocumentTypeDescriptor[] getTypeDefinitions() {
 
         List<DocumentTypeDescriptor> result = new ArrayList<DocumentTypeDescriptor>();
-        SchemaManager sm = null;
-        try {
-            sm = Framework.getService(SchemaManager.class);
-        } catch (Exception e) {
-            throw new ClientException("Unable to access SchemaManager", e);
-        }
+        SchemaManager sm = Framework.getService(SchemaManager.class);
 
         for (DocumentType dt : sm.getDocumentTypes()) {
             result.add(new DocumentTypeDescriptor(dt));
@@ -641,7 +632,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     /**
      * Utility method to build descriptor for a document that is non longer to be found in the repository.
-     * 
+     *
      * @param uuid
      * @return
      */

@@ -23,9 +23,8 @@ public class SecurityFiltering {
      *
      * @param seedPermissions
      * @return the list of permissions, seeds inclusive
-     * @throws Exception
      */
-    public static List<String> getPermissionList(String[] seedPermissions) throws Exception {
+    public static List<String> getPermissionList(String[] seedPermissions) {
         PermissionProvider pprovider = Framework.getService(PermissionProvider.class);
         List<String> aggregatedPerms = new LinkedList<String>();
         for (String seedPerm : seedPermissions) {
@@ -47,9 +46,8 @@ public class SecurityFiltering {
      * This is the list of all permissions that grant access to some indexed document.
      *
      * @return the list of all permissions that include Browse directly or un-directly
-     * @throws Exception
      */
-    public static List<String> getBrowsePermissionList() throws Exception {
+    public static List<String> getBrowsePermissionList() {
         return getPermissionList(BROWSE_PERMISSION_SEEDS);
     }
 
