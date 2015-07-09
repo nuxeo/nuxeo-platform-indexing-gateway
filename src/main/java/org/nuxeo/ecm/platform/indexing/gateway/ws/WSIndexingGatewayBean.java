@@ -16,6 +16,7 @@ import javax.jws.soap.SOAPBinding.Style;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.nuxeo.common.utils.ExceptionUtils;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
@@ -94,8 +95,8 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
             }
             try {
                 aquired = lock.tryLock(10, TimeUnit.SECONDS);
-            } catch (Throwable e) {
-                log.error("Failed to acquire lock for sid " + sid, e);
+            } catch (InterruptedException e) {
+                ExceptionUtils.checkInterrupt(e);
             }
             if (!aquired) {
                 log.error("Failed to acquire lock (timeout) for sid " + sid);
