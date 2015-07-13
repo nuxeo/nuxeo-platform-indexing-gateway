@@ -34,7 +34,6 @@ import org.nuxeo.ecm.platform.api.ws.DocumentSnapshot;
 import org.nuxeo.ecm.platform.api.ws.NuxeoRemoting;
 import org.nuxeo.ecm.platform.api.ws.WsACE;
 import org.nuxeo.ecm.platform.api.ws.session.WSRemotingSession;
-import org.nuxeo.ecm.platform.audit.api.AuditException;
 import org.nuxeo.ecm.platform.audit.ws.EventDescriptorPage;
 import org.nuxeo.ecm.platform.audit.ws.ModifiedDocumentDescriptor;
 import org.nuxeo.ecm.platform.audit.ws.ModifiedDocumentDescriptorPage;
@@ -113,7 +112,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
         }
     }
 
-    protected WSAudit getWSAudit() throws AuditException {
+    protected WSAudit getWSAudit() {
         if (auditBean == null) {
             auditBean = new WSAuditBean();
         }
@@ -478,21 +477,21 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     @WebMethod
     public ModifiedDocumentDescriptor[] listModifiedDocuments(@WebParam(name = "sessionId") String sessionId,
-            @WebParam(name = "dateRangeQuery") String dateRangeQuery) throws AuditException {
+            @WebParam(name = "dateRangeQuery") String dateRangeQuery) {
         return getWSAudit().listModifiedDocuments(sessionId, dateRangeQuery);
     }
 
     @WebMethod
     public ModifiedDocumentDescriptorPage listModifiedDocumentsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "path") String path,
-            @WebParam(name = "page") int page, @WebParam(name = "pageSize") int pageSize) throws AuditException {
+            @WebParam(name = "page") int page, @WebParam(name = "pageSize") int pageSize) {
         return getWSAudit().listModifiedDocumentsByPage(sessionId, dateRangeQuery, path, page, pageSize);
     }
 
     @WebMethod
     public EventDescriptorPage listEventsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "page") int page,
-            @WebParam(name = "pageSize") int pageSize) throws AuditException {
+            @WebParam(name = "pageSize") int pageSize) {
         return getWSAudit().listEventsByPage(sessionId, dateRangeQuery, page, pageSize);
     }
 
@@ -500,7 +499,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public EventDescriptorPage listDocumentEventsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "startDate") String startDate,
             @WebParam(name = "path") String path, @WebParam(name = "page") int page,
-            @WebParam(name = "pageSize") int pageSize) throws AuditException {
+            @WebParam(name = "pageSize") int pageSize) {
         return getWSAudit().listDocumentEventsByPage(sessionId, dateRangeQuery, startDate, path, page, pageSize);
     }
 
@@ -570,7 +569,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public EventDescriptorPage queryEventsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "whereClause") String whereClause, @WebParam(name = "pageIndex") int page,
-            @WebParam(name = "pageSize") int pageSize) throws AuditException {
+            @WebParam(name = "pageSize") int pageSize) {
         return getWSAudit().queryEventsByPage(sessionId, whereClause, page, pageSize);
     }
 
@@ -626,7 +625,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     public ModifiedDocumentDescriptorPage listDeletedDocumentsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dataRangeQuery") String dateRangeQuery, @WebParam(name = "docPath") String path,
-            @WebParam(name = "pageIndex") int page, @WebParam(name = "pageSize") int pageSize) throws AuditException {
+            @WebParam(name = "pageIndex") int page, @WebParam(name = "pageSize") int pageSize) {
 
         return getWSAudit().listDeletedDocumentsByPage(sessionId, dateRangeQuery, path, page, pageSize);
     }
