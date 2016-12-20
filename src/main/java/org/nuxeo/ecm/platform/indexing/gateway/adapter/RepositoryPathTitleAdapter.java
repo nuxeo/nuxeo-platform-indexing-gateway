@@ -37,7 +37,9 @@ import org.nuxeo.ecm.platform.api.ws.DocumentProperty;
  * instead of technical local path ids found in the default ecm:path property.
  *
  * @author Olivier Grisel <ogrisel@nuxeo.com>
+ * @deprecated since 9.1 not used anymore
  */
+@Deprecated
 public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
 
     public static final String PATH_TITLE_PROPERTY = "ecm:pathTitle";
@@ -69,15 +71,15 @@ public class RepositoryPathTitleAdapter extends BaseIndexingAdapter {
 
         // build a list with all the existing properties for document with ref
         // uuid
-        List<DocumentProperty> enhancedProperties = new ArrayList<DocumentProperty>();
+        List<DocumentProperty> enhancedProperties = new ArrayList<>();
         enhancedProperties.addAll(Arrays.asList(properties));
 
         // fetch the list of ancestor titles and build the new property
-        List<String> titles = new ArrayList<String>(parentDocuments.size());
+        List<String> titles = new ArrayList<>(parentDocuments.size());
         for (DocumentModel ancestor : parentDocuments) {
             titles.add(ancestor.getTitle());
         }
-        String pathTitle = StringUtils.join(titles, PATH_SEPARATOR);
+        String pathTitle = String.join(PATH_SEPARATOR, titles);
         enhancedProperties.add(new DocumentProperty(PATH_TITLE_PROPERTY, pathTitle));
 
         return enhancedProperties.toArray(new DocumentProperty[enhancedProperties.size()]);
