@@ -90,6 +90,16 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     protected Boolean enforceSync = null;
 
+    protected static boolean DEPRECATION_DONE;
+
+    protected static void logDeprecation() {
+        if (!DEPRECATION_DONE) {
+            DEPRECATION_DONE = true;
+            log.warn("The SOAP endpoint /webservices/indexinggateway"
+                    + " is DEPRECATED since Nuxeo 9.3 and will be removed in a future version");
+        }
+    }
+
     protected boolean forceSync() {
         if (enforceSync == null) {
             String value = Framework.getProperty(ENFORCE_SYNC_PROP_NAME, null);
@@ -154,6 +164,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentDescriptor[] getChildren(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         try {
             lockSession(sessionId);
             CoreSession session = initSession(sessionId).getDocumentManager();
@@ -170,6 +181,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentDescriptor getCurrentVersion(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uid) {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -186,6 +198,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentDescriptor getDocument(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         try {
             lockSession(sessionId);
             CoreSession session = initSession(sessionId).getDocumentManager();
@@ -204,6 +217,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public WsACE[] getDocumentACL(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid)
             {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -222,6 +236,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public WsACE[] getDocumentLocalACL(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid)
             {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -259,12 +274,14 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentBlob[] getDocumentBlobs(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         return getDocumentBlobsExt(sid, uuid, getAdapter().useDownloadUrlForBlob());
     }
 
     @WebMethod
     public DocumentProperty[] getDocumentNoBlobProperties(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
 
         try {
             lockSession(sid);
@@ -285,6 +302,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentProperty[] getDocumentProperties(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -303,16 +321,19 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String[] getGroups(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "parentGroup") String parentGroup) {
+        logDeprecation();
         return getWSNuxeoRemoting().getGroups(sid, parentGroup);
     }
 
     @WebMethod
     public String getRepositoryName(@WebParam(name = "sessionId") String sid) {
+        logDeprecation();
         return getWSNuxeoRemoting().getRepositoryName(sid);
     }
 
     @WebMethod
     public DocumentDescriptor getRootDocument(@WebParam(name = "sessionId") String sessionId) {
+        logDeprecation();
         try {
             lockSession(sessionId);
             return getWSNuxeoRemoting().getRootDocument(sessionId);
@@ -324,6 +345,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String resolvePathToUUID(@WebParam(name = "sessionId") String sessionId, @WebParam(name = "path") String path)
             {
+        logDeprecation();
         try {
             lockSession(sessionId);
             CoreSession session = initSession(sessionId).getDocumentManager();
@@ -343,6 +365,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public UUIDPage getRecursiveChildrenUUIDsByPage(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uuid, @WebParam(name = "page") int page,
             @WebParam(name = "pageSize") int pageSize) {
+        logDeprecation();
 
         try {
             lockSession(sid);
@@ -383,6 +406,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String[] getRecursiveChildrenUUIDs(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
 
         try {
             lockSession(sid);
@@ -414,6 +438,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     @WebMethod
     public DocumentTypeDescriptor[] getTypeDefinitions() {
+        logDeprecation();
 
         List<DocumentTypeDescriptor> result = new ArrayList<DocumentTypeDescriptor>();
         SchemaManager sm = Framework.getService(SchemaManager.class);
@@ -428,6 +453,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentDescriptor getDocumentFromPath(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "path") String path) {
+        logDeprecation();
         try {
             lockSession(sessionId);
             String uuid = resolvePathToUUID(sessionId, path);
@@ -446,6 +472,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentDescriptor getSourceDocument(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uid) {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -462,12 +489,14 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String[] getUsers(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "parentGroup") String parentGroup) {
+        logDeprecation();
         return getWSNuxeoRemoting().getUsers(sid, parentGroup);
     }
 
     @WebMethod
     public DocumentDescriptor[] getVersions(@WebParam(name = "sessionId") String sid,
             @WebParam(name = "uuid") String uid) {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -484,18 +513,21 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String[] listGroups(@WebParam(name = "sessionId") String sid, @WebParam(name = "from") int from,
             @WebParam(name = "to") int to) {
+        logDeprecation();
         return getWSNuxeoRemoting().listGroups(sid, from, to);
     }
 
     @WebMethod
     public String[] listUsers(@WebParam(name = "sessionId") String sid, @WebParam(name = "from") int from,
             @WebParam(name = "to") int to) {
+        logDeprecation();
         return getWSNuxeoRemoting().listUsers(sid, from, to);
     }
 
     @WebMethod
     public ModifiedDocumentDescriptor[] listModifiedDocuments(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery) {
+        logDeprecation();
         return getWSAudit().listModifiedDocuments(sessionId, dateRangeQuery);
     }
 
@@ -503,6 +535,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public ModifiedDocumentDescriptorPage listModifiedDocumentsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "path") String path,
             @WebParam(name = "page") int page, @WebParam(name = "pageSize") int pageSize) {
+        logDeprecation();
         return getWSAudit().listModifiedDocumentsByPage(sessionId, dateRangeQuery, path, page, pageSize);
     }
 
@@ -510,6 +543,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public EventDescriptorPage listEventsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "page") int page,
             @WebParam(name = "pageSize") int pageSize) {
+        logDeprecation();
         return getWSAudit().listEventsByPage(sessionId, dateRangeQuery, page, pageSize);
     }
 
@@ -518,12 +552,14 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
             @WebParam(name = "dateRangeQuery") String dateRangeQuery, @WebParam(name = "startDate") String startDate,
             @WebParam(name = "path") String path, @WebParam(name = "page") int page,
             @WebParam(name = "pageSize") int pageSize) {
+        logDeprecation();
         return getWSAudit().listDocumentEventsByPage(sessionId, dateRangeQuery, startDate, path, page, pageSize);
     }
 
     @WebMethod
     public String getRelativePathAsString(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         try {
             lockSession(sessionId);
             CoreSession session = initSession(sessionId).getDocumentManager();
@@ -540,6 +576,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public boolean hasPermission(@WebParam(name = "sessionId") String sid, @WebParam(name = "uuid") String uuid,
             @WebParam(name = "permission") String permission) {
+        logDeprecation();
         try {
             lockSession(sid);
             CoreSession session = initSession(sid).getDocumentManager();
@@ -556,6 +593,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String uploadDocument(@WebParam(name = "sessionId") String sid, String path, String type, String[] properties)
             {
+        logDeprecation();
         try {
             lockSession(sid);
             return getWSNuxeoRemoting().uploadDocument(sid, path, type, properties);
@@ -567,11 +605,13 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String connect(@WebParam(name = "userName") String username, @WebParam(name = "password") String password)
             {
+        logDeprecation();
         return getWSNuxeoRemoting().connect(username, password);
     }
 
     @WebMethod
     public void disconnect(@WebParam(name = "sessionId") String sid) {
+        logDeprecation();
         getWSNuxeoRemoting().disconnect(sid);
         if (forceSync()) {
             ReentrantLock lock = sessionIdLocks.get(sid);
@@ -588,6 +628,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public EventDescriptorPage queryEventsByPage(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "whereClause") String whereClause, @WebParam(name = "pageIndex") int page,
             @WebParam(name = "pageSize") int pageSize) {
+        logDeprecation();
         return getWSAudit().queryEventsByPage(sessionId, whereClause, page, pageSize);
     }
 
@@ -595,6 +636,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     public boolean validateUserPassword(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "username") String username, @WebParam(name = "password") String password)
             {
+        logDeprecation();
         WSRemotingSession rs = initSession(sessionId);
         return rs.getUserManager().checkUsernamePassword(username, password);
     }
@@ -602,6 +644,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public String[] getUserGroups(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "username") String username) {
+        logDeprecation();
         WSRemotingSession rs = initSession(sessionId);
         List<String> groups = rs.getUserManager().getPrincipal(username).getAllGroups();
         String[] groupArray = new String[groups.size()];
@@ -638,6 +681,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     @WebMethod
     public DocumentSnapshot getDocumentSnapshot(@WebParam(name = "sessionId") String sessionId,
             @WebParam(name = "uuid") String uuid) {
+        logDeprecation();
         return getDocumentSnapshotExt(sessionId, uuid, getAdapter().useDownloadUrlForBlob());
     }
 
