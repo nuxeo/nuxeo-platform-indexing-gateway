@@ -156,7 +156,7 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
 
     protected IndexingAdapter getAdapter() {
         if (adapter == null) {
-            adapter = Framework.getLocalService(IndexingAdapter.class);
+            adapter = Framework.getService(IndexingAdapter.class);
         }
         return adapter;
     }
