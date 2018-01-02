@@ -38,7 +38,7 @@ import org.nuxeo.ecm.platform.api.ws.WsACE;
  */
 public class SimpleACLIndexingAdapter extends BaseIndexingAdapter {
 
-    protected final static ACE BLOCKING_ACE = new ACE(SecurityConstants.EVERYONE, SecurityConstants.EVERYTHING, false);
+    protected final static WsACE BLOCKING_ACE = new WsACE(SecurityConstants.EVERYONE, SecurityConstants.EVERYTHING, false);
 
     protected List<String> CACHED_PERMISSIONS_TO_INDEX;
 
