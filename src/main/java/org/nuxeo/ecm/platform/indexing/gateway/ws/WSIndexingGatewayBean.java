@@ -103,7 +103,6 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
     protected boolean forceSync() {
         if (enforceSync == null) {
             String value = Framework.getProperty(ENFORCE_SYNC_PROP_NAME, null);
-            enforceSync = false;
             if (value != null) {
                 enforceSync = Boolean.parseBoolean(value);
             } else {
