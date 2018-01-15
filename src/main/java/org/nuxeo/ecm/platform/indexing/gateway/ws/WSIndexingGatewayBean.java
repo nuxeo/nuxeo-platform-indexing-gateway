@@ -39,6 +39,7 @@ import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.IterableQueryResult;
+import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.PathRef;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
@@ -122,7 +123,8 @@ public class WSIndexingGatewayBean extends AbstractNuxeoWebService implements WS
             try {
                 aquired = lock.tryLock(10, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                ExceptionUtils.checkInterrupt(e);
+                Thread.currentThread().interrupt();
+                throw new NuxeoException(e);
             }
             if (!aquired) {
                 log.error("Failed to acquire lock (timeout) for sid " + sid);
